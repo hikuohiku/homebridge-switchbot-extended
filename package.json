@@ -1,0 +1,109 @@
+{
+  "displayName": "SwitchBot",
+  "name": "@switchbot/homebridge-switchbot",
+  "version": "3.7.0",
+  "description": "The SwitchBot plugin allows you to access your SwitchBot device(s) from HomeKit.",
+  "author": {
+    "name": "SwitchBot",
+    "url": "https://github.com/SwitchBot",
+    "email": "support@wondertechlabs.com"
+  },
+  "contributors": [
+    {
+      "name": "Donavan Becker",
+      "url": "https://github.com/donavanbecker"
+    }
+  ],
+  "type": "module",
+  "license": "ISC",
+  "icon": "https://raw.githubusercontent.com/OpenWonderLabs/homebridge-switchbot/latest/branding/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/OpenWonderLabs/homebridge-switchbot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenWonderLabs/homebridge-switchbot/issues"
+  },
+  "engineStrict": true,
+  "engines": {
+    "homebridge": "^1.8.4 || ^2.0.0-alpha.0",
+    "node": "^18 || ^20 || ^22"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "check": "npm install && npm outdated",
+    "update": "ncu -u && npm update && npm install",
+    "lint": "eslint src/**/*.ts",
+    "watch": "npm run build && npm run plugin-ui && npm link && nodemon",
+    "plugin-ui": "rsync ./src/homebridge-ui/public/index.html ./dist/homebridge-ui/public/",
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run lint && npm run build && npm run plugin-ui ",
+    "postpublish": "npm run clean",
+    "clean": "rimraf ./dist",
+    "test": "npm run lint",
+    "docs": "typedoc",
+    "lint-docs": "typedoc --emit none --treatWarningsAsErrors"
+  },
+  "funding": [
+    {
+      "type": "Paypal",
+      "url": "https://paypal.me/donavanbecker"
+    },
+    {
+      "type": "GitHub",
+      "url": "https://github.com/sponsors/donavanbecker"
+    }
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "switchbot",
+    "lights",
+    "fan",
+    "outlet",
+    "hub",
+    "lightstrip",
+    "motion",
+    "contact",
+    "vacuum",
+    "lock",
+    "humidifier",
+    "humidity",
+    "temperature",
+    "bot",
+    "curtains",
+    "windows",
+    "ble",
+    "ir"
+  ],
+  "dependencies": {
+    "@homebridge/plugin-ui-utils": "^1.0.3",
+    "async-mqtt": "^2.6.3",
+    "fakegato-history": "^0.6.4",
+    "homebridge-lib": "^7.0.4",
+    "rxjs": "^7.8.1",
+    "undici": "^6.19.2"
+  },
+  "optionalDependencies": {
+    "node-switchbot": "2.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.7.0",
+    "@stylistic/eslint-plugin": "^2.3.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.14.11",
+    "eslint": "^9.7.0",
+    "globals": "^15.8.0",
+    "homebridge": "^1.8.4",
+    "homebridge-config-ui-x": "4.56.4",
+    "nodemon": "^3.1.4",
+    "npm-check-updates": "^16.14.20",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typedoc": "^0.26.5",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.0.0-alpha.44"
+  }
+}
