@@ -64,7 +64,7 @@ export class Light extends irdeviceBase {
       // Initialize NightLight Service
       accessory.context.NightLight = accessory.context.NightLight ?? {};
       this.NightLight = {
-        Name: `${accessory.displayName} Night Light`,
+        Name: 'Night Light',
         Service: accessory.getService('Night Light') ?? accessory.addService(this.hap.Service.Lightbulb, 'Night Light') as Service,
         On: accessory.context.On || false,
       };
