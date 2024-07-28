@@ -154,6 +154,7 @@ export class Light extends irdeviceBase {
     await this.debugLog(`On: ${value}`);
 
     this.LightBulb!.On = value;
+    this.NightLight!.On = false;
     if (this.LightBulb?.On) {
       const On = true;
       await this.pushLightOnChanges(On);
