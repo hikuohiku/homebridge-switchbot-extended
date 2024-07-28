@@ -10,12 +10,12 @@ import type { SwitchBotBLEModel, SwitchBotBLEModelName, SwitchBotBLEModelFriendl
 /**
  * This is the name of the platform that users will use to register the plugin in the Homebridge config.json
  */
-export const PLATFORM_NAME = 'SwitchBot';
+export const PLATFORM_NAME = 'SwitchBot Extended';
 
 /**
  * This must match the name of your plugin as defined the package.json
  */
-export const PLUGIN_NAME = '@switchbot/homebridge-switchbot';
+export const PLUGIN_NAME = '@hikuohiku/homebridge-switchbot-extended';
 
 /**
  * This is the main url used to access SwitchBot API
