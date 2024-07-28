@@ -2,56 +2,56 @@
  *
  * platform.ts: @switchbot/homebridge-switchbot platform class.
  */
-import { Hub } from './device/hub.js';
 import { Bot } from './device/bot.js';
-import { Plug } from './device/plug.js';
-import { Lock } from './device/lock.js';
-import { Meter } from './device/meter.js';
-import { Motion } from './device/motion.js';
+import { CeilingLight } from './device/ceilinglight.js';
+import { ColorBulb } from './device/colorbulb.js';
 import { Contact } from './device/contact.js';
 import { Curtain } from './device/curtain.js';
-import { IOSensor } from './device/iosensor.js';
-import { MeterPlus } from './device/meterplus.js';
-import { ColorBulb } from './device/colorbulb.js';
-import { StripLight } from './device/lightstrip.js';
+import { Hub } from './device/hub.js';
 import { Humidifier } from './device/humidifier.js';
-import { CeilingLight } from './device/ceilinglight.js';
-import { WaterDetector } from './device/waterdetector.js';
+import { IOSensor } from './device/iosensor.js';
+import { StripLight } from './device/lightstrip.js';
+import { Lock } from './device/lock.js';
+import { Meter } from './device/meter.js';
+import { MeterPlus } from './device/meterplus.js';
+import { Motion } from './device/motion.js';
+import { Plug } from './device/plug.js';
 import { RobotVacuumCleaner } from './device/robotvacuumcleaner.js';
+import { WaterDetector } from './device/waterdetector.js';
 
-import { Fan } from './device/fan.js';
-import { TV } from './irdevice/tv.js';
-import { IRFan } from './irdevice/fan.js';
-import { Light } from './irdevice/light.js';
-import { Others } from './irdevice/other.js';
-import { Camera } from './irdevice/camera.js';
 import { BlindTilt } from './device/blindtilt.js';
-import { AirPurifier } from './irdevice/airpurifier.js';
-import { WaterHeater } from './irdevice/waterheater.js';
-import { VacuumCleaner } from './irdevice/vacuumcleaner.js';
+import { Fan } from './device/fan.js';
 import { AirConditioner } from './irdevice/airconditioner.js';
+import { AirPurifier } from './irdevice/airpurifier.js';
+import { Camera } from './irdevice/camera.js';
+import { IRFan } from './irdevice/fan.js';
+import { Light } from './irdevice/mylight.js';
+import { Others } from './irdevice/other.js';
+import { TV } from './irdevice/tv.js';
+import { VacuumCleaner } from './irdevice/vacuumcleaner.js';
+import { WaterHeater } from './irdevice/waterheater.js';
 
-import { Buffer } from 'buffer';
-import { request } from 'undici';
 import asyncmqtt from 'async-mqtt';
-import { createServer } from 'http';
-import { queueScheduler } from 'rxjs';
-import fakegato from 'fakegato-history';
+import { Buffer } from 'buffer';
 import crypto, { randomUUID } from 'crypto';
+import fakegato from 'fakegato-history';
 import { readFileSync, writeFileSync } from 'fs';
 import { EveHomeKitTypes } from 'homebridge-lib/EveHomeKitTypes';
-import { PLATFORM_NAME, PLUGIN_NAME, Devices, deleteWebhook, queryWebhook, setupWebhook, updateWebhook } from './settings.js';
+import { createServer } from 'http';
+import { queueScheduler } from 'rxjs';
+import { request } from 'undici';
+import { Devices, PLATFORM_NAME, PLUGIN_NAME, deleteWebhook, queryWebhook, setupWebhook, updateWebhook } from './settings.js';
 import { isBlindTiltDevice, isCurtainDevice, sleep } from './utils.js';
 
-import type { UrlObject } from 'url';
-import type { MqttClient } from 'mqtt';
-import type { Dispatcher } from 'undici';
-import type { irdevice } from './types/irdevicelist.js';
-import type { blindTilt, curtain, curtain3, device } from './types/devicelist.js';
 import type { API, DynamicPlatformPlugin, Logging, PlatformAccessory } from 'homebridge';
-import type { SwitchBotPlatformConfig, devicesConfig, irDevicesConfig } from './settings.js';
 import type { IncomingMessage, Server, ServerResponse } from 'http';
+import type { MqttClient } from 'mqtt';
 import { SwitchBotModel } from 'node-switchbot';
+import type { Dispatcher } from 'undici';
+import type { UrlObject } from 'url';
+import type { SwitchBotPlatformConfig, devicesConfig, irDevicesConfig } from './settings.js';
+import type { blindTilt, curtain, curtain3, device } from './types/devicelist.js';
+import type { irdevice } from './types/irdevicelist.js';
 
 /**
  * HomebridgePlatform
