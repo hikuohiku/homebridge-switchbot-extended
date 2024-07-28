@@ -83,7 +83,7 @@ export class Light extends irdeviceBase {
         .onGet(() => {
           return this.NightLight!.On;
         })
-        .onSet(this.OnSet.bind(this));
+        .onSet(this.OnSetNightLight.bind(this));
     } else {
       // Initialize ProgrammableSwitchOn Service
       accessory.context.ProgrammableSwitchOn = accessory.context.ProgrammableSwitchOn ?? {};
