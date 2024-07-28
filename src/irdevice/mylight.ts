@@ -167,6 +167,24 @@ export class Light extends irdeviceBase {
      */
   }
 
+  async OnSetNightLight(value: CharacteristicValue): Promise<void> {
+    await this.debugLog(`On: ${value}`);
+
+    this.NightLight!.On = value;
+    if (this.NightLight?.On) {
+      const On = true;
+      await this.pushNightLightOnChanges(On);
+    } else {
+      this.LightBulb!.On = true;
+      const LightOn = true;
+      await this.pushLightOnChanges(LightOn);
+    }
+    /**
+     * pushLightOnChanges and pushLightOffChanges above assume they are measuring the state of the accessory BEFORE
+     * they are updated, so we are only updating the accessory state after calling the above.
+     */
+  }
+
   async ProgrammableSwitchOutputStateSetOn(value: CharacteristicValue): Promise<void> {
     await this.debugLog(`On: ${value}`);
 
@@ -235,6 +253,20 @@ export class Light extends irdeviceBase {
     }
   }
 
+  async pushNightLightOnChanges(On: boolean): Promise<void> {
+    await this.debugLog(`pushNightLightOnChanges On: ${On}, disablePushOn: ${this.disablePushOn}`);
+    if (On === true && this.disablePushOn === false) {
+      const commandType: string = 'customize';
+      const command: string = '常夜灯';
+      const bodyChange = JSON.stringify({
+        command: command,
+        parameter: 'default',
+        commandType: commandType,
+      });
+      await this.pushChanges(bodyChange, On);
+    }
+  }
+
   async pushChanges(bodyChange: any, On: boolean): Promise<void> {
     this.debugLog('pushChanges');
     if (this.device.connectionType === 'OpenAPI') {
@@ -267,6 +299,13 @@ export class Light extends irdeviceBase {
       // On
       await this.updateCharacteristic(this.LightBulb.Service, this.hap.Characteristic.On,
         this.LightBulb.On, 'On');
+
+      // Night Light
+      if (this.NightLight?.Service) {
+        // On
+        await this.updateCharacteristic(this.NightLight.Service, this.hap.Characteristic.On,
+          this.NightLight.On, 'On');
+      }
     } else {
       if (this.ProgrammableSwitchOn?.Service) {
         // On Stateful Programmable Switch
