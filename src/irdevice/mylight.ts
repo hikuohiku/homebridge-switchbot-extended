@@ -171,11 +171,11 @@ export class Light extends irdeviceBase {
     await this.debugLog(`On: ${value}`);
 
     this.NightLight!.On = value;
+    this.LightBulb!.On = true;
     if (this.NightLight?.On) {
       const On = true;
       await this.pushNightLightOnChanges(On);
     } else {
-      this.LightBulb!.On = true;
       const LightOn = true;
       await this.pushLightOnChanges(LightOn);
     }
