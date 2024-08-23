@@ -5,7 +5,6 @@
 import { irdeviceBase } from './irdevice.js';
 
 import {
-  Characteristic,
   type CharacteristicValue,
   type PlatformAccessory,
   type Service,
