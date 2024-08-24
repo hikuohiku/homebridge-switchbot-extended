@@ -96,6 +96,27 @@ export class Light extends irdeviceBase {
           return this.LightBulb!.Brightness;
         })
         .onSet(this.BrightnessSet.bind(this));
+
+      // Watch for Bulb change events
+      // We put in a debounce of 100ms so we don't make duplicate calls
+      this.doCeilingLightUpdate
+        .pipe(
+          tap(() => {
+            this.ceilingLightUpdateInProgress = true;
+          }),
+          debounceTime(1000),
+        )
+        .subscribe(async () => {
+          try {
+            await this.pushBrightnessChanges();
+          } catch (e: any) {
+            await this.apiError(e);
+            await this.errorLog(
+              `failed pushChanges with ${device.connectionType} Connection, Error Message: ${JSON.stringify(e.message)}`,
+            );
+          }
+          this.ceilingLightUpdateInProgress = false;
+        });
     } else {
       // Initialize ProgrammableSwitchOn Service
       accessory.context.ProgrammableSwitchOn =
@@ -183,25 +204,6 @@ export class Light extends irdeviceBase {
         })
         .onSet(this.ProgrammableSwitchOutputStateSetOff.bind(this));
     }
-
-    // Watch for Bulb change events
-    // We put in a debounce of 100ms so we don't make duplicate calls
-    this.doCeilingLightUpdate
-      .pipe(
-        tap(() => {
-          this.ceilingLightUpdateInProgress = true;
-        }),
-        debounceTime(100),
-      )
-      .subscribe(async () => {
-        try {
-          await this.pushBrightnessChanges();
-        } catch (e: any) {
-          await this.apiError(e);
-          await this.errorLog(`failed pushChanges with ${device.connectionType} Connection, Error Message: ${JSON.stringify(e.message)}`);
-        }
-        this.ceilingLightUpdateInProgress = false;
-      });
   }
 
   async OnSet(value: CharacteristicValue): Promise<void> {
@@ -348,7 +350,7 @@ export class Light extends irdeviceBase {
     } else {
       this.warnLog(
         'Connection Type: ' +
-        `${this.device.connectionType}, commands will not be sent to OpenAPI`,
+          `${this.device.connectionType}, commands will not be sent to OpenAPI`,
       );
     }
   }
@@ -376,7 +378,7 @@ export class Light extends irdeviceBase {
     } else {
       this.warnLog(
         'Connection Type: ' +
-        `${this.device.connectionType}, commands will not be sent to OpenAPI`,
+          `${this.device.connectionType}, commands will not be sent to OpenAPI`,
       );
     }
   }
