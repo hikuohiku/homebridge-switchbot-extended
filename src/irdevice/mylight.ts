@@ -32,10 +32,6 @@ export class Light extends irdeviceBase {
     ProgrammableSwitchEvent: CharacteristicValue;
   };
 
-  private NightLightLabel?: {
-    Service: Service;
-  };
-
   private ProgrammableSwitchOn?: {
     Name: CharacteristicValue;
     Service: Service;
@@ -85,17 +81,6 @@ export class Light extends irdeviceBase {
           this.hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
       };
       accessory.context.NightLight = this.NightLight as object;
-      accessory.context.NightLightLabel =
-        accessory.context.NightLightLabel ?? {};
-      this.NightLightLabel = {
-        Service:
-          accessory.getService('Night Light Label') ??
-          (accessory.addService(
-            this.hap.Service.ServiceLabel,
-            'Night Light Label',
-          ) as Service),
-      };
-      accessory.context.NightLightLabel = this.NightLightLabel as object;
 
       this.LightBulb.Service.setCharacteristic(
         this.hap.Characteristic.Name,
@@ -116,12 +101,6 @@ export class Light extends irdeviceBase {
           return this.NightLight!.ProgrammableSwitchEvent;
         })
         .onSet(this.OnSetNightLight.bind(this));
-      this.NightLight.Service.getCharacteristic(
-        this.hap.Characteristic.ServiceLabelIndex,
-      ).setValue(1);
-      this.NightLightLabel.Service.getCharacteristic(
-        this.hap.Characteristic.ServiceLabelNamespace,
-      ).setValue(1);
     } else {
       // Initialize ProgrammableSwitchOn Service
       accessory.context.ProgrammableSwitchOn =
