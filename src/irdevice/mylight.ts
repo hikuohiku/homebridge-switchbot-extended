@@ -9,6 +9,7 @@ import type {
   PlatformAccessory,
   Service,
 } from 'homebridge';
+import { debounceTime, Subject, tap } from 'rxjs';
 import type { SwitchBotPlatform } from '../platform.js';
 import type { irDevicesConfig } from '../settings.js';
 import type { irdevice } from '../types/irdevicelist.js';
@@ -41,6 +42,9 @@ export class Light extends irdeviceBase {
     ProgrammableSwitchOutputState: CharacteristicValue;
   };
 
+  ceilingLightUpdateInProgress!: boolean;
+  doCeilingLightUpdate!: Subject<void>;
+
   constructor(
     readonly platform: SwitchBotPlatform,
     accessory: PlatformAccessory,
@@ -49,6 +53,10 @@ export class Light extends irdeviceBase {
     super(platform, accessory, device);
     // Set category
     accessory.category = this.hap.Categories.LIGHTBULB;
+
+    // this is subject we use to track when we need to POST changes to the SwitchBot API
+    this.doCeilingLightUpdate = new Subject();
+    this.ceilingLightUpdateInProgress = false;
 
     if (!device.irlight?.stateless) {
       // Initialize LightBulb Service
@@ -175,6 +183,25 @@ export class Light extends irdeviceBase {
         })
         .onSet(this.ProgrammableSwitchOutputStateSetOff.bind(this));
     }
+
+    // Watch for Bulb change events
+    // We put in a debounce of 100ms so we don't make duplicate calls
+    this.doCeilingLightUpdate
+      .pipe(
+        tap(() => {
+          this.ceilingLightUpdateInProgress = true;
+        }),
+        debounceTime(100),
+      )
+      .subscribe(async () => {
+        try {
+          await this.pushBrightnessChanges();
+        } catch (e: any) {
+          await this.apiError(e);
+          await this.errorLog(`failed pushChanges with ${device.connectionType} Connection, Error Message: ${JSON.stringify(e.message)}`);
+        }
+        this.ceilingLightUpdateInProgress = false;
+      });
   }
 
   async OnSet(value: CharacteristicValue): Promise<void> {
@@ -204,7 +231,7 @@ export class Light extends irdeviceBase {
       this.debugLog(`Set Brightness: ${value}, On: ${this.LightBulb!.On}`);
     }
     this.LightBulb!.Brightness = value;
-    await this.pushBrightnessChanges();
+    this.doCeilingLightUpdate.next();
   }
 
   async ProgrammableSwitchOutputStateSetOn(
@@ -321,7 +348,7 @@ export class Light extends irdeviceBase {
     } else {
       this.warnLog(
         'Connection Type: ' +
-          `${this.device.connectionType}, commands will not be sent to OpenAPI`,
+        `${this.device.connectionType}, commands will not be sent to OpenAPI`,
       );
     }
   }
@@ -349,7 +376,7 @@ export class Light extends irdeviceBase {
     } else {
       this.warnLog(
         'Connection Type: ' +
-          `${this.device.connectionType}, commands will not be sent to OpenAPI`,
+        `${this.device.connectionType}, commands will not be sent to OpenAPI`,
       );
     }
   }
