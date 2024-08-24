@@ -677,7 +677,7 @@ export class AirConditioner extends irdeviceBase {
 
   async ThresholdTemperatureSet(value: CharacteristicValue): Promise<void> {
     this.HeaterCooler.ThresholdTemperature = value;
-    this.accessory.context.CurrentTemperature =
+    this.HeaterCooler.CurrentTemperature =
       this.HeaterCooler.ThresholdTemperature;
     await this.debugLog(
       `Set ThresholdTemperature: ${this.HeaterCooler.ThresholdTemperature},` +
