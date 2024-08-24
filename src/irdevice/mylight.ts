@@ -20,12 +20,7 @@ export class Light extends irdeviceBase {
     Name: CharacteristicValue;
     Service: Service;
     On: CharacteristicValue;
-  };
-
-  private NightLight?: {
-    Name: CharacteristicValue;
-    Service: Service;
-    On: CharacteristicValue;
+    Brightness: CharacteristicValue;
   };
 
   private ProgrammableSwitchOn?: {
@@ -58,17 +53,11 @@ export class Light extends irdeviceBase {
         Name: accessory.displayName,
         Service: accessory.getService(this.hap.Service.Lightbulb) ?? accessory.addService(this.hap.Service.Lightbulb) as Service,
         On: accessory.context.On || false,
+        Brightness: accessory.context.Brightness ?? 0,
       };
       accessory.context.LightBulb = this.LightBulb as object;
 
-      // Initialize NightLight Service
-      accessory.context.NightLight = accessory.context.NightLight ?? {};
-      this.NightLight = {
-        Name: 'Night Light',
-        Service: accessory.getService('Night Light') ?? accessory.addService(this.hap.Service.Lightbulb, 'Night Light') as Service,
-        On: accessory.context.NightLightOn || false,
-      };
-
+      // Initialize LightBulb Characteristics
       this.LightBulb.Service
         .setCharacteristic(this.hap.Characteristic.Name, this.LightBulb.Name)
         .getCharacteristic(this.hap.Characteristic.On)
@@ -77,13 +66,19 @@ export class Light extends irdeviceBase {
         })
         .onSet(this.OnSet.bind(this));
 
-      this.NightLight.Service
-        .setCharacteristic(this.hap.Characteristic.Name, this.NightLight.Name)
-        .getCharacteristic(this.hap.Characteristic.On)
-        .onGet(() => {
-          return this.NightLight!.On;
+      // initialize Brightness
+      this.LightBulb.Service
+        .getCharacteristic(this.hap.Characteristic.Brightness)
+        .setProps({
+          minStep: 1,
+          minValue: 0,
+          maxValue: 2,
+          validValueRanges: [0, 2],
         })
-        .onSet(this.OnSetNightLight.bind(this));
+        .onGet(() => {
+          return this.LightBulb!.Brightness;
+        })
+        .onSet(this.BrightnessSet.bind(this));
     } else {
       // Initialize ProgrammableSwitchOn Service
       accessory.context.ProgrammableSwitchOn = accessory.context.ProgrammableSwitchOn ?? {};
@@ -154,13 +149,12 @@ export class Light extends irdeviceBase {
     await this.debugLog(`On: ${value}`);
 
     this.LightBulb!.On = value;
-    const NightLightOn = false;
     if (this.LightBulb?.On) {
       const On = true;
-      await this.pushLightOnChanges(On, NightLightOn);
+      await this.pushLightOnChanges(On);
     } else {
       const On = false;
-      await this.pushLightOffChanges(On, NightLightOn);
+      await this.pushLightOffChanges(On);
     }
     /**
      * pushLightOnChanges and pushLightOffChanges above assume they are measuring the state of the accessory BEFORE
@@ -168,23 +162,19 @@ export class Light extends irdeviceBase {
      */
   }
 
-  async OnSetNightLight(value: CharacteristicValue): Promise<void> {
-    await this.debugLog(`On: ${value}`);
-
-    this.NightLight!.On = value;
-    const On = true;
-    if (this.NightLight?.On) {
-      const NightLightOn = true;
-      await this.pushNightLightOnChanges(On, NightLightOn);
+  /**
+   * Handle requests to set the value of the "Brightness" characteristic
+   */
+  async BrightnessSet(value: CharacteristicValue): Promise<void> {
+    if (this.LightBulb!.On) {
+      await this.infoLog(`Set Brightness: ${value}`);
     } else {
-      const NightLightOn = false;
-      await this.pushLightOnChanges(On, NightLightOn);
+      this.debugLog(`Set Brightness: ${value}, On: ${this.LightBulb!.On}`);
     }
-    /**
-     * pushLightOnChanges and pushLightOffChanges above assume they are measuring the state of the accessory BEFORE
-     * they are updated, so we are only updating the accessory state after calling the above.
-     */
+    this.LightBulb!.Brightness = value;
+    await this.pushBrightnessChanges();
   }
+
 
   async ProgrammableSwitchOutputStateSetOn(value: CharacteristicValue): Promise<void> {
     await this.debugLog(`On: ${value}`);
@@ -192,8 +182,7 @@ export class Light extends irdeviceBase {
     this.ProgrammableSwitchOn!.ProgrammableSwitchOutputState = value;
     if (this.ProgrammableSwitchOn?.ProgrammableSwitchOutputState === 1) {
       const On = true;
-      const NightLightOn = false;
-      await this.pushLightOnChanges(On, NightLightOn);
+      await this.pushLightOnChanges(On);
     }
     /**
      * pushLightOnChanges and pushLightOffChanges above assume they are measuring the state of the accessory BEFORE
@@ -207,8 +196,7 @@ export class Light extends irdeviceBase {
     this.ProgrammableSwitchOff!.ProgrammableSwitchOutputState = value;
     if (this.ProgrammableSwitchOff?.ProgrammableSwitchOutputState === 1) {
       const On = false;
-      const NightLightOn = false;
-      await this.pushLightOffChanges(On, NightLightOn);
+      await this.pushLightOffChanges(On);
     }
     /**
      * pushLightOnChanges and pushLightOffChanges above assume they are measuring the state of the accessory BEFORE
@@ -228,7 +216,7 @@ export class Light extends irdeviceBase {
    * Light -       "command"       "channelAdd"      "default"	        =        next channel
    * Light -       "command"       "channelSub"      "default"	        =        previous channel
    */
-  async pushLightOnChanges(On: boolean, NightLightOn: boolean): Promise<void> {
+  async pushLightOnChanges(On: boolean): Promise<void> {
     await this.debugLog(`pushLightOnChanges On: ${On}, disablePushOn: ${this.disablePushOn}`);
     if (On === true && this.disablePushOn === false) {
       const commandType: string = await this.commandType();
@@ -238,11 +226,11 @@ export class Light extends irdeviceBase {
         parameter: 'default',
         commandType: commandType,
       });
-      await this.pushChanges(bodyChange, On, NightLightOn);
+      await this.pushChanges(bodyChange, On);
     }
   }
 
-  async pushLightOffChanges(On: boolean, NightLightOn: boolean): Promise<void> {
+  async pushLightOffChanges(On: boolean): Promise<void> {
     await this.debugLog(`pushLightOffChanges On: ${On}, disablePushOff: ${this.disablePushOff}`);
     if (On === false && this.disablePushOff === false) {
       const commandType: string = await this.commandType();
@@ -252,25 +240,45 @@ export class Light extends irdeviceBase {
         parameter: 'default',
         commandType: commandType,
       });
-      await this.pushChanges(bodyChange, On, NightLightOn);
+      await this.pushChanges(bodyChange, On);
     }
   }
 
-  async pushNightLightOnChanges(On: boolean, NightLightOn: boolean): Promise<void> {
-    await this.debugLog(`pushNightLightOnChanges On: ${On}, disablePushOn: ${this.disablePushOn}`);
-    if (On === true && this.disablePushOn === false) {
-      const commandType: string = 'customize';
-      const command: string = '常夜灯';
-      const bodyChange = JSON.stringify({
-        command: command,
-        parameter: 'default',
-        commandType: commandType,
-      });
-      await this.pushChanges(bodyChange, On, NightLightOn);
+  async pushBrightnessChanges(): Promise<void> {
+    await this.debugLog('pushBrightnessChanges');
+    const commandType: string = 'customize';
+    const command: string = this.LightBulb!.Brightness === 0 ? '常夜灯' : this.LightBulb!.Brightness === 1 ? '調光1' : '全灯';
+    const bodyChange = JSON.stringify({
+      command: command,
+      parameter: 'default',
+      commandType: commandType,
+    });
+    await this.debugLog(`(pushBrightnessChanges) SwitchBot OpenAPI bodyChange: ${JSON.stringify(bodyChange)}`);
+    if (this.device.connectionType === 'OpenAPI') {
+      this.infoLog(`Sending request to SwitchBot API, body: ${bodyChange},`);
+      try {
+        const { body, statusCode } = await this.pushChangeRequest(bodyChange);
+        const deviceStatus: any = await body.json();
+        await this.pushStatusCodes(statusCode, deviceStatus);
+        if (await this.successfulStatusCodes(statusCode, deviceStatus)) {
+          await this.successfulPushChange(statusCode, deviceStatus, bodyChange);
+          this.accessory.context.On = true;
+          await this.updateHomeKitCharacteristics();
+        } else {
+          await this.statusCode(statusCode);
+          await this.statusCode(deviceStatus.statusCode);
+        }
+      } catch (e: any) {
+        await this.apiError(e);
+        await this.pushChangeError(e);
+      }
+    } else {
+      this.warnLog('Connection Type: '
+        + `${this.device.connectionType}, commands will not be sent to OpenAPI`);
     }
   }
 
-  async pushChanges(bodyChange: any, On: boolean, NightLightOn: boolean): Promise<void> {
+  async pushChanges(bodyChange: any, On: boolean): Promise<void> {
     this.debugLog('pushChanges');
     if (this.device.connectionType === 'OpenAPI') {
       this.infoLog(`Sending request to SwitchBot API, body: ${bodyChange},`);
@@ -281,7 +289,6 @@ export class Light extends irdeviceBase {
         if (await this.successfulStatusCodes(statusCode, deviceStatus)) {
           await this.successfulPushChange(statusCode, deviceStatus, bodyChange);
           this.accessory.context.On = On;
-          this.accessory.context.NightLightOn = NightLightOn;
           await this.updateHomeKitCharacteristics();
         } else {
           await this.statusCode(statusCode);
@@ -303,13 +310,9 @@ export class Light extends irdeviceBase {
       // On
       await this.updateCharacteristic(this.LightBulb.Service, this.hap.Characteristic.On,
         this.LightBulb.On, 'On');
-
-      // Night Light
-      if (this.NightLight?.Service) {
-        // On
-        await this.updateCharacteristic(this.NightLight.Service, this.hap.Characteristic.On,
-          this.NightLight.On, 'On');
-      }
+      // Brightness
+      await this.updateCharacteristic(this.LightBulb.Service, this.hap.Characteristic.Brightness,
+        this.LightBulb.Brightness, 'Brightness');
     } else {
       if (this.ProgrammableSwitchOn?.Service) {
         // On Stateful Programmable Switch
@@ -327,6 +330,7 @@ export class Light extends irdeviceBase {
   async apiError(e: any): Promise<void> {
     if (!this.device.irlight?.stateless) {
       this.LightBulb?.Service.updateCharacteristic(this.hap.Characteristic.On, e);
+      this.LightBulb?.Service.updateCharacteristic(this.hap.Characteristic.Brightness, e);
     } else {
       this.ProgrammableSwitchOn?.Service.updateCharacteristic(this.hap.Characteristic.ProgrammableSwitchEvent, e);
       this.ProgrammableSwitchOn?.Service.updateCharacteristic(this.hap.Characteristic.ProgrammableSwitchOutputState, e);
