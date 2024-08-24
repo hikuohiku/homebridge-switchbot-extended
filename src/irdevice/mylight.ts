@@ -71,8 +71,8 @@ export class Light extends irdeviceBase {
         .getCharacteristic(this.hap.Characteristic.On)
         .onGet(() => {
           return this.LightBulb!.On;
-        })
-        .onSet(this.OnSet.bind(this));
+        });
+      // .onSet(this.OnSet.bind(this));
 
       // initialize Brightness
       this.LightBulb.Service.getCharacteristic(
