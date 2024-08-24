@@ -104,7 +104,7 @@ export class Light extends irdeviceBase {
           tap(() => {
             this.ceilingLightUpdateInProgress = true;
           }),
-          debounceTime(1000),
+          debounceTime(200),
         )
         .subscribe(async () => {
           try {
