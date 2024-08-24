@@ -92,7 +92,7 @@ export class Light extends irdeviceBase {
         this.hap.Characteristic.Name,
         this.NightLight.Name,
       )
-        .getCharacteristic(this.hap.Characteristic.ProgrammableSwitchEvent)
+        .getCharacteristic(this.hap.Characteristic.On)
         .onSet(this.OnSetNightLight.bind(this));
     } else {
       // Initialize ProgrammableSwitchOn Service
