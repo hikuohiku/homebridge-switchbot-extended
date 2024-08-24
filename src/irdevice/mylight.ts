@@ -319,7 +319,7 @@ export class Light extends irdeviceBase {
       (this.LightBulb!.Brightness as number) < 33
         ? '常夜灯'
         : (this.LightBulb!.Brightness as number) < 66
-          ? '調光1'
+          ? '調光１'
           : '全灯';
     const bodyChange = JSON.stringify({
       command: command,
