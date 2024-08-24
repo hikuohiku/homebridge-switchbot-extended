@@ -29,7 +29,6 @@ export class Light extends irdeviceBase {
   private NightLight?: {
     Name: CharacteristicValue;
     Service: Service;
-    ProgrammableSwitchEvent: CharacteristicValue;
   };
 
   private ProgrammableSwitchOn?: {
@@ -77,10 +76,7 @@ export class Light extends irdeviceBase {
             this.hap.Service.StatelessProgrammableSwitch,
             'Night Light',
           ) as Service),
-        ProgrammableSwitchEvent:
-          this.hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
       };
-      accessory.context.NightLight = this.NightLight as object;
 
       this.LightBulb.Service.setCharacteristic(
         this.hap.Characteristic.Name,
@@ -97,9 +93,6 @@ export class Light extends irdeviceBase {
         this.NightLight.Name,
       )
         .getCharacteristic(this.hap.Characteristic.ProgrammableSwitchEvent)
-        .onGet(() => {
-          return this.NightLight!.ProgrammableSwitchEvent;
-        })
         .onSet(this.OnSetNightLight.bind(this));
     } else {
       // Initialize ProgrammableSwitchOn Service
