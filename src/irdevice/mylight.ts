@@ -79,8 +79,8 @@ export class Light extends irdeviceBase {
         .getCharacteristic(this.hap.Characteristic.On)
         .onGet(() => {
           return this.LightBulb!.On;
-        });
-      // .onSet(this.OnSet.bind(this));
+        })
+        .onSet(this.OnSet.bind(this));
 
       // initialize Brightness
       this.LightBulb.Service.getCharacteristic(
@@ -214,13 +214,7 @@ export class Light extends irdeviceBase {
     await this.debugLog(`On: ${value}`);
 
     this.LightBulb!.On = value;
-    if (this.LightBulb?.On) {
-      const On = true;
-      await this.pushLightOnChanges(On);
-    } else {
-      const On = false;
-      await this.pushLightOffChanges(On);
-    }
+    this.doCeilingLightUpdate.next();
     /**
      * pushLightOnChanges and pushLightOffChanges above assume they are measuring the state of the accessory BEFORE
      * they are updated, so we are only updating the accessory state after calling the above.
