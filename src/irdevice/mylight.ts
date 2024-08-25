@@ -231,7 +231,6 @@ export class Light extends irdeviceBase {
       this.debugLog(`Set Brightness: ${value}, On: ${this.LightBulb!.On}`);
     }
     this.LightBulb!.Brightness = value;
-    this.LightBulb!.On = value !== 0;
     this.doCeilingLightUpdate.next();
   }
 
@@ -315,9 +314,9 @@ export class Light extends irdeviceBase {
     );
     const commandType: string = 'customize';
     const command: string =
-      (this.LightBulb!.Brightness as number) < 50
+      (this.LightBulb!.Brightness as number) < 25
         ? '常夜灯'
-        : (this.LightBulb!.Brightness as number) < 99
+        : (this.LightBulb!.Brightness as number) < 75
           ? '調光１'
           : '全灯';
     const bodyChange = JSON.stringify({
