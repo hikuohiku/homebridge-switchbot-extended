@@ -128,7 +128,7 @@ export class AirConditioner extends irdeviceBase {
       .setProps({
         minValue: this.set_min_heat,
         maxValue: this.set_max_heat,
-        minStep: 0.5,
+        minStep: 1,
       })
       .onGet(async () => {
         return await this.ThresholdTemperatureGet();
@@ -141,7 +141,7 @@ export class AirConditioner extends irdeviceBase {
       .setProps({
         minValue: this.set_min_cool,
         maxValue: this.set_max_cool,
-        minStep: 0.5,
+        minStep: 1,
       })
       .onGet(async () => {
         return await this.ThresholdTemperatureGet();
