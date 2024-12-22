@@ -1,3 +1,4 @@
+** This repo is a fork of https://github.com/OpenWonderLabs/homebridge-switchbot for my personal cusomization. **
 <span align="center">
 
 <a href="https://github.com/homebridge/verified/blob/master/verified-plugins.json"><img alt="homebridge-verified" src="https://raw.githubusercontent.com/OpenWonderLabs/homebridge-switchbot/latest/branding/Homebridge_x_SwitchBot.svg?sanitize=true" width="350px"></a>
